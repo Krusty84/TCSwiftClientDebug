@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		3DB3454C2E3FE7BE00A5DB2C /* TCSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB3454B2E3FE7BE00A5DB2C /* TCSwiftBridge */; };
+		3DB345622E3FEACE00A5DB2C /* TCSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB345612E3FEACE00A5DB2C /* TCSwiftBridge */; };
+		3DB345772E3FF0C600A5DB2C /* TCSwiftBridge in Frameworks */ = {isa = PBXBuildFile; productRef = 3DB345762E3FF0C600A5DB2C /* TCSwiftBridge */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		3DB3453B2E3FE73D00A5DB2C /* TCSwiftClientDebug.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TCSwiftClientDebug.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3DB345772E3FF0C600A5DB2C /* TCSwiftBridge in Frameworks */,
+				3DB345622E3FEACE00A5DB2C /* TCSwiftBridge in Frameworks */,
+				3DB3454C2E3FE7BE00A5DB2C /* TCSwiftBridge in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +74,9 @@
 			);
 			name = TCSwiftClientDebug;
 			packageProductDependencies = (
+				3DB3454B2E3FE7BE00A5DB2C /* TCSwiftBridge */,
+				3DB345612E3FEACE00A5DB2C /* TCSwiftBridge */,
+				3DB345762E3FF0C600A5DB2C /* TCSwiftBridge */,
 			);
 			productName = TCSwiftClientDebug;
 			productReference = 3DB3453B2E3FE73D00A5DB2C /* TCSwiftClientDebug.app */;
@@ -94,6 +106,9 @@
 			);
 			mainGroup = 3DB345322E3FE73D00A5DB2C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				3DB345752E3FF0C600A5DB2C /* XCLocalSwiftPackageReference "../TCSwiftBridge" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 3DB3453C2E3FE73D00A5DB2C /* Products */;
 			projectDirPath = "";
@@ -254,6 +269,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TCSwiftClientDebug/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -279,6 +295,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = TCSwiftClientDebug/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -315,6 +332,28 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3DB345752E3FF0C600A5DB2C /* XCLocalSwiftPackageReference "../TCSwiftBridge" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../TCSwiftBridge;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		3DB3454B2E3FE7BE00A5DB2C /* TCSwiftBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TCSwiftBridge;
+		};
+		3DB345612E3FEACE00A5DB2C /* TCSwiftBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TCSwiftBridge;
+		};
+		3DB345762E3FF0C600A5DB2C /* TCSwiftBridge */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = TCSwiftBridge;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 3DB345332E3FE73D00A5DB2C /* Project object */;
 }
