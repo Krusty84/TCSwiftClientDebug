@@ -1,4 +1,5 @@
-Just for teasting purpose, dirty but works
+This extremely poorly made app 😅 will help you test and play around with the library:
+https://github.com/Krusty84/TCSwiftBridge 
 
 
 <img width="808" height="660" alt="image" src="https://github.com/user-attachments/assets/be467dfd-bba8-46bc-86c5-2f84865b5360" />
