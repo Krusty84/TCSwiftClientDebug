@@ -39,6 +39,20 @@ struct ContentView: View {
             
             Divider()
             
+                    Button("Load Saved Queries") {
+                        Task { await vm.loadSavedQueries() }
+                    }
+
+                    List(vm.savedQueries, id: \.uid) { q in
+                        VStack(alignment: .leading) {
+                            Text(q.name).bold()
+                            Text(q.description).font(.caption).foregroundStyle(.secondary)
+                            Text("UID: \(q.uid)").font(.caption2)
+                        }
+                    }
+              
+        
+            
             Group {
                 TextField("Container UID", text: $containerUid)
                 HStack {

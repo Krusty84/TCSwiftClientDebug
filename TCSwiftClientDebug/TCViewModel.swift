@@ -15,6 +15,7 @@ final class TCViewModel: ObservableObject {
     @Published var tcBase: String = "http://51.250.17.165:7001/tc"
     @Published var sessionInfo: SessionInfoResponse?
     @Published var expandedRows: [[String: Any]] = []
+    @Published var savedQueries: [SavedQueryInfo] = []
     // Raw log list
     @Published var rawLogs: [TeamcenterAPIService.RawLog] = []
     private let api = TeamcenterAPIService.shared
@@ -67,6 +68,7 @@ final class TCViewModel: ObservableObject {
             propertyAttributes: propertyAttributes
         ) {
             expandedRows = rows
+            print("folder: ", expandedRows)
             status = "Expanded home folder (\(rows.count) items)"
         } else {
             status = "Expand failed"
@@ -109,6 +111,17 @@ final class TCViewModel: ObservableObject {
         let (itemUid, itemRevUid) = await api.getItemFromId(tcEndpointUrl: url, itemId: itemId, revIds: revIds)
         status = (itemUid != nil) ? "Found \(itemUid!), rev \(itemRevUid ?? "-")" : "Not found"
     }
+    
+    // MARK: Get Saved Teamcenter Query
+    func loadSavedQueries() async {
+            let url = APIConfig.tcGetSavedQueriesUrl(tcUrl: tcBase)
+            if let list = await api.getSavedQueries(tcEndpointUrl: url) {
+                savedQueries = list
+                status = "Loaded \(list.count) saved queries"
+            } else {
+                status = "Failed to load saved queries"
+            }
+        }
     
     // MARK: BOM example (skeleton)
     func makeBomWindow(itemUid: String) async {
