@@ -107,7 +107,7 @@ final class TCViewModel: ObservableObject {
     
     // MARK: Find item + rev by ID
     func getItem(itemId: String, revIds: [String]) async {
-        let url = APIConfig.getItemFromId(tcUrl: tcBase)
+        let url = APIConfig.tcGetItemFromId(tcUrl: tcBase)
         let (itemUid, itemRevUid) = await api.getItemFromId(tcEndpointUrl: url, itemId: itemId, revIds: revIds)
         status = (itemUid != nil) ? "Found \(itemUid!), rev \(itemRevUid ?? "-")" : "Not found"
     }
@@ -125,7 +125,7 @@ final class TCViewModel: ObservableObject {
     
     // MARK: BOM example (skeleton)
     func makeBomWindow(itemUid: String) async {
-        let createUrl = APIConfig.createBOMWindows(tcUrl: tcBase)
+        let createUrl = APIConfig.tcCreateBOMWindows(tcUrl: tcBase)
         let (winUid, lineUid) = await api.createBOMWindows(
             tcEndpointUrl: createUrl,
             itemUid: itemUid,
@@ -139,19 +139,19 @@ final class TCViewModel: ObservableObject {
         guard let window = winUid, let line = lineUid else { status = "BOM create failed"; return }
         
         // Optionally add children (example: using a created item revision UID)
-        let addUrl = APIConfig.addOrUpdateBOMLine(tcUrl: tcBase) // used inside the service method
+        let addUrl = APIConfig.tcAddOrUpdateBOMLine(tcUrl: tcBase) // used inside the service method
         _ = addUrl // just to show the flow; method builds its own request
         // await api.addOrUpdateChildrenToParentLine(tcEndpointUrl: addUrl, parentLine: line, createdItemRevUid: "<revUid>")
         
         // Save window (payload structure depends on your TC setup)
-        let saveUrl = APIConfig.saveBOMWindows(tcUrl: tcBase)
+        let saveUrl = APIConfig.tcSaveBOMWindows(tcUrl: tcBase)
         let bomWindowsPayload: [[String: Any]] = [
             ["bomWindow": window] // add more fields according to your server’s policy
         ]
         _ = await api.saveBOMWindows(tcEndpointUrl: saveUrl, bomWindows: bomWindowsPayload)
         
         // Close window
-        let closeUrl = APIConfig.closeBOMWindows(tcUrl: tcBase)
+        let closeUrl = APIConfig.tcCloseBOMWindows(tcUrl: tcBase)
         _ = await api.closeBOMWindows(tcEndpointUrl: closeUrl)
         
         status = "BOM window flow done"
