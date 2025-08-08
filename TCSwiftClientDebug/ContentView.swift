@@ -14,6 +14,11 @@ struct ContentView: View {
     @State private var pass = "infodba"
     @State private var userUid = ""
     @State private var containerUid = ""
+    @State private var firstUid = ""
+    @State private var firstType = ""
+    @State private var secondUid = ""
+    @State private var secondType = ""
+    @State private var relationType = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -43,13 +48,45 @@ struct ContentView: View {
                         Task { await vm.loadSavedQueries() }
                     }
 
-                    List(vm.savedQueries, id: \.uid) { q in
-                        VStack(alignment: .leading) {
-                            Text(q.name).bold()
-                            Text(q.description).font(.caption).foregroundStyle(.secondary)
-                            Text("UID: \(q.uid)").font(.caption2)
-                        }
-                    }
+                    if !vm.savedQueries.isEmpty {
+                           ForEach(vm.savedQueries, id: \.uid) { q in
+                               VStack(alignment: .leading) {
+                                   Text(q.name).bold()
+                                   Text(q.description).font(.caption).foregroundStyle(.secondary)
+                                   Text("UID: \(q.uid)").font(.caption2)
+                               }
+                               Divider()
+                           }
+                       }
+            Divider()
+            
+            Group {
+                      Text("Create Relation").font(.headline)
+                      TextField("First UID",      text: $firstUid)
+                      TextField("First Type",     text: $firstType)
+                      TextField("Second UID",     text: $secondUid)
+                      TextField("Second Type",    text: $secondType)
+                      TextField("Relation Type",  text: $relationType)
+                      Button("Make Relation") {
+                          Task {
+                              await vm.makeRelation(
+                                  firstUid: firstUid,
+                                  firstType: firstType,
+                                  secondUid: secondUid,
+                                  secondType: secondType,
+                                  relationType: relationType
+                              )
+                          }
+                      }
+                      if let rel = vm.createdRelation {
+                          VStack(alignment: .leading) {
+                              Text("Created relation UID: \(rel.uid)")
+                              Text("Class: \(rel.className), Type: \(rel.type)")
+                          }
+                          .font(.caption)
+                          .foregroundStyle(.blue)
+                      }
+                  }
               
         
             

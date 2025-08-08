@@ -16,6 +16,7 @@ final class TCViewModel: ObservableObject {
     @Published var sessionInfo: SessionInfoResponse?
     @Published var expandedRows: [[String: Any]] = []
     @Published var savedQueries: [SavedQueryInfo] = []
+    @Published var createdRelation: FolderBasic?
     // Raw log list
     @Published var rawLogs: [TeamcenterAPIService.RawLog] = []
     private let api = TeamcenterAPIService.shared
@@ -120,6 +121,27 @@ final class TCViewModel: ObservableObject {
                 status = "Loaded \(list.count) saved queries"
             } else {
                 status = "Failed to load saved queries"
+            }
+        }
+    //MARK: Create relation
+    func makeRelation(
+            firstUid: String, firstType: String,
+            secondUid: String, secondType: String,
+            relationType: String
+        ) async {
+            let url = APIConfig.tcCreateRelation(tcUrl: tcBase)
+            if let rel = await api.createRelation(
+                tcEndpointUrl: url,
+                firstUid: firstUid,
+                firstType: firstType,
+                secondUid: secondUid,
+                secondType: secondType,
+                relationType: relationType
+            ) {
+                createdRelation = rel
+                status = "Relation created: \(rel.uid)"
+            } else {
+                status = "Failed to create relation"
             }
         }
     
