@@ -1,4 +1,4 @@
-Please evaluate these endpoints:
+
 
 
 2.  const response = await helpers.apiClient.post(tcUrl + '/JsonRestServices/Core-2007-01-DataManagement/setProperties',
