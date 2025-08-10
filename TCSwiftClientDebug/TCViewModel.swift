@@ -16,6 +16,7 @@ final class TCViewModel: ObservableObject {
     @Published var sessionInfo: SessionInfoResponse?
     @Published var expandedRows: [[String: Any]] = []
     @Published var savedQueries: [SavedQueryInfo] = []
+    @Published var queryFields: [QueryFieldDescription] = []
     @Published var createdRelation: FolderBasic?
     // Raw log list
     @Published var rawLogs: [TeamcenterAPIService.RawLog] = []
@@ -115,35 +116,48 @@ final class TCViewModel: ObservableObject {
     
     // MARK: Get Saved Teamcenter Query
     func loadSavedQueries() async {
-            let url = APIConfig.tcGetSavedQueriesUrl(tcUrl: tcBase)
-            if let list = await api.getSavedQueries(tcEndpointUrl: url) {
-                savedQueries = list
-                status = "Loaded \(list.count) saved queries"
-            } else {
-                status = "Failed to load saved queries"
-            }
+        let url = APIConfig.tcGetSavedQueriesUrl(tcUrl: tcBase)
+        if let list = await api.getSavedQueries(tcEndpointUrl: url) {
+            savedQueries = list
+            status = "Loaded \(list.count) saved queries"
+        } else {
+            status = "Failed to load saved queries"
         }
+    }
+    
+    //Describe selected saved queries
+    func describeSavedQueries(uids: [String]) async {
+        guard !uids.isEmpty else { status = "Pick queries first"; return }
+        let url = APIConfig.tcDescribeSavedQueriesUrl(tcUrl: tcBase)
+        if let fields = await api.getQueryDescription(tcEndpointUrl: url, queryUids: uids) {
+            queryFields = fields
+            status = "Got \(fields.count) fields"
+        } else {
+            status = "Failed to get query description"
+        }
+    }
+    
     //MARK: Create relation
     func makeRelation(
-            firstUid: String, firstType: String,
-            secondUid: String, secondType: String,
-            relationType: String
-        ) async {
-            let url = APIConfig.tcCreateRelation(tcUrl: tcBase)
-            if let rel = await api.createRelation(
-                tcEndpointUrl: url,
-                firstUid: firstUid,
-                firstType: firstType,
-                secondUid: secondUid,
-                secondType: secondType,
-                relationType: relationType
-            ) {
-                createdRelation = rel
-                status = "Relation created: \(rel.uid)"
-            } else {
-                status = "Failed to create relation"
-            }
+        firstUid: String, firstType: String,
+        secondUid: String, secondType: String,
+        relationType: String
+    ) async {
+        let url = APIConfig.tcCreateRelation(tcUrl: tcBase)
+        if let rel = await api.createRelation(
+            tcEndpointUrl: url,
+            firstUid: firstUid,
+            firstType: firstType,
+            secondUid: secondUid,
+            secondType: secondType,
+            relationType: relationType
+        ) {
+            createdRelation = rel
+            status = "Relation created: \(rel.uid)"
+        } else {
+            status = "Failed to create relation"
         }
+    }
     
     // MARK: BOM example (skeleton)
     func makeBomWindow(itemUid: String) async {
