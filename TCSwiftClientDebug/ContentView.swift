@@ -27,12 +27,10 @@ struct ContentView: View {
 
                 // Header / login
                 HeaderSection(vm: vm, user: $user, pass: $pass)
-
                 Divider()
 
                 // Expand home folder
                 ExpandHomeSection(vm: vm, userUid: $userUid)
-
                 Divider()
 
                 // Saved queries + description side-by-side
@@ -40,9 +38,11 @@ struct ContentView: View {
                     vm: vm,
                     selectedQueryUIDs: $selectedQueryUIDs
                 )
-
                 Divider()
-
+                
+                PreferencesSection(vm: vm)
+                Divider()
+                
                 // Create relation
                 RelationSection(
                     vm: vm,
@@ -52,7 +52,6 @@ struct ContentView: View {
                     secondType: $secondType,
                     relationType: $relationType
                 )
-
                 Divider()
 
                 // Create folder/item
@@ -60,7 +59,6 @@ struct ContentView: View {
                     vm: vm,
                     containerUid: $containerUid
                 )
-
                 Divider()
 
                 // Expanded rows (avoid Hashable Any by using indices)
@@ -99,6 +97,134 @@ private struct HeaderSection: View {
                 Button("Login") { Task { await vm.login(user: user, pass: pass) } }
                 Button("Session Info") { Task { await vm.loadSessionInfo() } }
             }
+        }
+    }
+}
+
+private struct PreferencesSection: View {
+    @ObservedObject var vm: TCViewModel
+    @State private var namesCSV: String = "*"          // e.g. "TC_*,Fnd0*"
+    @State private var includeDescriptions: Bool = true
+    @State private var filterText: String = ""         // quick client-side filter
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Preferences").font(.headline)
+
+            HStack(spacing: 8) {
+                TextField("Names (comma-separated, * for all)", text: $namesCSV)
+                    .textFieldStyle(.roundedBorder)
+                Toggle("Include Descriptions", isOn: $includeDescriptions)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                Button("Load") {
+                    Task { await vm.loadPreferences(namesCSV: namesCSV, includeDescriptions: includeDescriptions) }
+                }
+            }
+
+            // simple local filter
+            TextField("Filter by name/category/value…", text: $filterText)
+                .textFieldStyle(.roundedBorder)
+
+            PreferencesList(
+                entries: filtered(entries: vm.preferences, q: filterText)
+            )
+            .frame(maxHeight: 320) // own scroll area
+        }
+    }
+
+    private func filtered(entries: [PreferenceEntry], q: String) -> [PreferenceEntry] {
+        let t = q.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !t.isEmpty else { return entries }
+        let k = t.lowercased()
+        return entries.filter { e in
+            let d = e.definition
+            let v = e.values?.values?.joined(separator: " ")
+            return d.name.lowercased().contains(k)
+                || d.category.lowercased().contains(k)
+            || ((v?.lowercased().contains(k)) != nil)
+        }
+    }
+}
+
+private struct PreferencesList: View {
+    let entries: [PreferenceEntry]
+
+    var body: some View {
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 8) {
+                if entries.isEmpty {
+                    Text("No preferences").font(.caption).foregroundStyle(.secondary)
+                } else {
+                    ForEach(entries.indices, id: \.self) { i in
+                        PreferenceRow(entry: entries[i])
+                    }
+                }
+            }
+            .padding(.trailing, 4)
+        }
+    }
+}
+
+private struct PreferenceRow: View {
+    let entry: PreferenceEntry
+
+    var body: some View {
+        let def = entry.definition
+        let vals = entry.values?.values ?? []             // safe fallback
+        let origin = entry.values?.valueOrigination ?? "" // optional
+
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Text(def.name).bold()
+                Spacer()
+                Text(scopeLabel(def.protectionScope))
+                    .font(.caption2).padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(Color(.tertiarySystemFill))
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                if def.isArray {
+                    Text("Array")
+                        .font(.caption2).padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Color(.tertiarySystemFill))
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                }
+            }
+
+            Text("Category: \(def.category)")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            if !def.description.isEmpty {
+                Text(def.description)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+            }
+
+            if !origin.isEmpty {
+                Text("Origin: \(origin)").font(.caption2)
+            }
+
+            if vals.isEmpty {
+                Text("Values: —").font(.caption2)
+            } else {
+                let head = vals.prefix(3)
+                Text("Values: \(head.joined(separator: " | "))\(vals.count > 3 ? " … (+\(vals.count - 3))" : "")")
+                    .font(.caption2)
+            }
+        }
+        .padding(8)
+        //.background(Color(.secondarySystemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+
+    private func scopeLabel(_ s: String) -> String {
+        switch s.lowercased() {
+        case "site": return "Site"
+        case "group": return "Group"
+        case "role": return "Role"
+        case "user": return "User"
+        default: return s
         }
     }
 }

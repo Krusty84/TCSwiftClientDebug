@@ -18,6 +18,7 @@ final class TCViewModel: ObservableObject {
     @Published var savedQueries: [SavedQueryInfo] = []
     @Published var queryFields: [QueryFieldDescription] = []
     @Published var createdRelation: FolderBasic?
+    @Published var preferences: [PreferenceEntry] = []
     // Raw log list
     @Published var rawLogs: [TeamcenterAPIService.RawLog] = []
     private let api = TeamcenterAPIService.shared
@@ -44,6 +45,33 @@ final class TCViewModel: ObservableObject {
         let url = APIConfig.tcSessionInfoUrl(tcUrl: tcBase)
         sessionInfo = await api.getTcSessionInfo(tcEndpointUrl: url)
         status = sessionInfo == nil ? "Session info failed" : "Session info loaded"
+    }
+    
+    // MARK: Get Perefences
+    func loadPreferences(
+        namesCSV: String,
+        includeDescriptions: Bool
+    ) async {
+        // Parse comma-separated names (trim blanks). Default to ["*"] if empty.
+        let names: [String] = namesCSV
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let finalNames = names.isEmpty ? ["*"] : names
+
+        let url = APIConfig.tcGetPreferencesUrl(tcUrl: tcBase) // or vm.tcBase if that’s your var
+        if let list = await api.getPreferences(
+            tcEndpointUrl: url,
+            preferenceNames: finalNames,
+            includeDescriptions: includeDescriptions
+        ) {
+            // you can sort if you like
+            preferences = list.sorted { $0.definition.name.localizedCompare($1.definition.name) == .orderedAscending }
+            status = "Loaded \(preferences.count) preferences"
+        } else {
+            preferences = []
+            status = "Failed to load preferences"
+        }
     }
     
     // MARK: Get user home folder, then expand it
@@ -79,7 +107,7 @@ final class TCViewModel: ObservableObject {
     
     // MARK: Create a folder under a container
     func createFolder(name: String, desc: String, containerUid: String, containerClass: String, containerType: String) async {
-        let url = APIConfig.tcCreateFolder(tcUrl: tcBase)
+        let url = APIConfig.tcCreateFolderUrl(tcUrl: tcBase)
         let result = await api.createFolder(
             tcEndpointUrl: url,
             name: name,
@@ -94,7 +122,7 @@ final class TCViewModel: ObservableObject {
     // MARK: Create an item under a container
     func createItem(itemName: String, itemType: String, description: String,
                     containerUid: String, containerClass: String, containerType: String) async {
-        let url = APIConfig.tcCreateItem(tcUrl: tcBase)
+        let url = APIConfig.tcCreateItemUrl(tcUrl: tcBase)
         let (itemUid, itemRevUid) = await api.createItem(
             tcEndpointUrl: url,
             name: itemName,
@@ -109,7 +137,7 @@ final class TCViewModel: ObservableObject {
     
     // MARK: Find item + rev by ID
     func getItem(itemId: String, revIds: [String]) async {
-        let url = APIConfig.tcGetItemFromId(tcUrl: tcBase)
+        let url = APIConfig.tcGetItemFromIdUrl(tcUrl: tcBase)
         let (itemUid, itemRevUid) = await api.getItemFromId(tcEndpointUrl: url, itemId: itemId, revIds: revIds)
         status = (itemUid != nil) ? "Found \(itemUid!), rev \(itemRevUid ?? "-")" : "Not found"
     }
@@ -143,7 +171,7 @@ final class TCViewModel: ObservableObject {
         secondUid: String, secondType: String,
         relationType: String
     ) async {
-        let url = APIConfig.tcCreateRelation(tcUrl: tcBase)
+        let url = APIConfig.tcCreateRelationUrl(tcUrl: tcBase)
         if let rel = await api.createRelation(
             tcEndpointUrl: url,
             firstUid: firstUid,
@@ -161,7 +189,7 @@ final class TCViewModel: ObservableObject {
     
     // MARK: BOM example (skeleton)
     func makeBomWindow(itemUid: String) async {
-        let createUrl = APIConfig.tcCreateBOMWindows(tcUrl: tcBase)
+        let createUrl = APIConfig.tcCreateBOMWindowsUrl(tcUrl: tcBase)
         let (winUid, lineUid) = await api.createBOMWindows(
             tcEndpointUrl: createUrl,
             itemUid: itemUid,
@@ -175,19 +203,19 @@ final class TCViewModel: ObservableObject {
         guard let window = winUid, let line = lineUid else { status = "BOM create failed"; return }
         
         // Optionally add children (example: using a created item revision UID)
-        let addUrl = APIConfig.tcAddOrUpdateBOMLine(tcUrl: tcBase) // used inside the service method
+        let addUrl = APIConfig.tcAddOrUpdateBOMLineUrl(tcUrl: tcBase) // used inside the service method
         _ = addUrl // just to show the flow; method builds its own request
         // await api.addOrUpdateChildrenToParentLine(tcEndpointUrl: addUrl, parentLine: line, createdItemRevUid: "<revUid>")
         
         // Save window (payload structure depends on your TC setup)
-        let saveUrl = APIConfig.tcSaveBOMWindows(tcUrl: tcBase)
+        let saveUrl = APIConfig.tcSaveBOMWindowsUrl(tcUrl: tcBase)
         let bomWindowsPayload: [[String: Any]] = [
             ["bomWindow": window] // add more fields according to your server’s policy
         ]
         _ = await api.saveBOMWindows(tcEndpointUrl: saveUrl, bomWindows: bomWindowsPayload)
         
         // Close window
-        let closeUrl = APIConfig.tcCloseBOMWindows(tcUrl: tcBase)
+        let closeUrl = APIConfig.tcCloseBOMWindowsUrl(tcUrl: tcBase)
         _ = await api.closeBOMWindows(tcEndpointUrl: closeUrl)
         
         status = "BOM window flow done"
