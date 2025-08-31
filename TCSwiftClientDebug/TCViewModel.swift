@@ -42,7 +42,7 @@ final class TCViewModel: ObservableObject {
     
     // MARK: Session info
     func loadSessionInfo() async {
-        let url = APIConfig.tcSessionInfoUrl(tcUrl: tcBase)
+        let url = APIConfig.tcGetSessionInfoUrl(tcUrl: tcBase)
         sessionInfo = await api.getTcSessionInfo(tcEndpointUrl: url)
         status = sessionInfo == nil ? "Session info failed" : "Session info loaded"
     }
